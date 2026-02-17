@@ -11,38 +11,38 @@
             <span class="text-sqq-brown font-bold text-lg">{stats.totalResponses}</span>
             <span class="text-gray-600 ml-1">réponse{#if stats.totalResponses != 1}s{/if}</span>
         </div>
-        <div class="flex gap-3">
+        <div class="flex w-full sm:w-auto gap-3">
             <a href="/admin/export"
-               class="bg-sqq-yellow text-sqq-brown font-bold py-2 px-5 rounded-full hover:brightness-110 transition shadow-md text-sm">
+               class="w-full sm:w-auto text-center bg-sqq-yellow text-sqq-brown font-bold py-2 px-5 rounded-full hover:brightness-110 transition shadow-md text-sm">
                 Exporter en Excel
             </a>
             <a href="/admin/logout"
-               class="bg-gray-200 text-gray-700 font-bold py-2 px-5 rounded-full hover:bg-gray-300 transition shadow-md text-sm">
+               class="w-full sm:w-auto text-center bg-gray-200 text-gray-700 font-bold py-2 px-5 rounded-full hover:bg-gray-300 transition shadow-md text-sm">
                 Déconnexion
             </a>
         </div>
     </div>
 
     <!-- Q1: Shopping slots heatmap -->
-    <div class="bg-white rounded-xl border-2 border-sqq-yellow p-6 shadow-sm">
+    <div class="bg-white rounded-xl border-2 border-sqq-yellow p-4 sm:p-6 shadow-sm">
         <h2 class="text-sqq-brown text-lg font-bold mb-4">Créneaux de courses</h2>
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="bg-sqq-brown text-white">
-                        <th class="p-2 text-left rounded-tl-lg"></th>
+                        <th class="p-1 sm:p-2 text-left rounded-tl-lg"></th>
                         {#for slot in stats.shoppingSlots}
-                        <th class="p-2 text-center {#if slot_isLast}rounded-tr-lg{/if}">{slot}</th>
+                        <th class="p-1 sm:p-2 text-center {#if slot_isLast}rounded-tr-lg{/if}">{slot}</th>
                         {/for}
                     </tr>
                 </thead>
                 <tbody>
                     {#for day in stats.days}
                     <tr class="{#if day_index.mod(2) == 0}bg-sqq-light{#else}bg-white{/if}">
-                        <td class="p-2 font-medium text-sqq-brown">{day}</td>
+                        <td class="p-1 sm:p-2 font-medium text-sqq-brown">{day}</td>
                         {#for slotKey in stats.shoppingSlotKeys}
-                        <td class="p-2 text-center">
+                        <td class="p-1 sm:p-2 text-center">
                             <span class="inline-block rounded px-2 py-1 text-xs font-bold
                                 {#if stats.shoppingCount(day_index, slotKey_index) > 0}bg-sqq-yellow text-sqq-brown{#else}bg-gray-100 text-gray-400{/if}">
                                 {stats.shoppingCount(day_index, slotKey_index)}
@@ -60,7 +60,7 @@
     </div>
 
     <!-- Q2: Service shifts weighted scores -->
-    <div class="bg-white rounded-xl border-2 border-sqq-yellow p-6 shadow-sm">
+    <div class="bg-white rounded-xl border-2 border-sqq-yellow p-4 sm:p-6 shadow-sm">
         <h2 class="text-sqq-brown text-lg font-bold mb-4">Créneaux de permanence (scores pondérés)</h2>
         <p class="text-xs text-gray-500 mb-3">Priorité 1 = 3 pts, Priorité 2 = 2 pts, Priorité 3 = 1 pt</p>
 
@@ -68,18 +68,18 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="bg-sqq-brown text-white">
-                        <th class="p-2 text-left rounded-tl-lg"></th>
+                        <th class="p-1 sm:p-2 text-left rounded-tl-lg"></th>
                         {#for slot in stats.serviceSlots}
-                        <th class="p-2 text-center {#if slot_isLast}rounded-tr-lg{/if}">{slot}</th>
+                        <th class="p-1 sm:p-2 text-center {#if slot_isLast}rounded-tr-lg{/if}">{slot}</th>
                         {/for}
                     </tr>
                 </thead>
                 <tbody>
                     {#for day in stats.days}
                     <tr class="{#if day_index.mod(2) == 0}bg-sqq-light{#else}bg-white{/if}">
-                        <td class="p-2 font-medium text-sqq-brown">{day}</td>
+                        <td class="p-1 sm:p-2 font-medium text-sqq-brown">{day}</td>
                         {#for slot in stats.serviceSlots}
-                        <td class="p-2 text-center">
+                        <td class="p-1 sm:p-2 text-center">
                             <span class="inline-block rounded px-2 py-1 text-xs font-bold
                                 {#if stats.serviceScore(day_index, slot_index) > 0}bg-sqq-yellow text-sqq-brown{#else}bg-gray-100 text-gray-400{/if}">
                                 {stats.serviceScore(day_index, slot_index)}

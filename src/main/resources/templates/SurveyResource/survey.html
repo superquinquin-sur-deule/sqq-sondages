@@ -3,7 +3,7 @@
 {#header}Sondage coopérateurs{/header}
 {#body}
 
-<div id="already-answered" class="bg-white rounded-xl border-2 border-sqq-yellow p-8 shadow-sm text-center max-w-lg mx-auto hidden">
+<div id="already-answered" class="bg-white rounded-xl border-2 border-sqq-yellow p-6 sm:p-8 shadow-sm text-center max-w-lg mx-auto hidden">
     <div class="text-5xl mb-4">&#9888;</div>
     <h2 class="text-sqq-brown text-xl font-bold mb-4">Vous avez déjà répondu au sondage</h2>
     <p class="text-gray-600">
@@ -14,7 +14,7 @@
 <form action="/submit" method="post" id="survey-form" class="space-y-8">
 
     <!-- Question 1 -->
-    <div class="bg-white rounded-xl border-2 border-sqq-yellow p-6 shadow-sm">
+    <div class="bg-white rounded-xl border-2 border-sqq-yellow p-4 sm:p-6 shadow-sm">
         <h2 class="text-sqq-brown text-lg font-bold mb-4">
             1. Quels sont vos créneaux habituels pour faire vos courses ?
         </h2>
@@ -25,22 +25,22 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="bg-sqq-brown text-white">
-                        <th class="p-2 text-left rounded-tl-lg"></th>
+                        <th class="p-1 sm:p-2 text-left rounded-tl-lg"></th>
                         {#for slot in shoppingSlots}
-                        <th class="p-2 text-center {#if slot_isLast}rounded-tr-lg{/if}">{slot}</th>
+                        <th class="p-1 sm:p-2 text-center {#if slot_isLast}rounded-tr-lg{/if}">{slot}</th>
                         {/for}
                     </tr>
                 </thead>
                 <tbody>
                     {#for day in days}
                     <tr class="{#if day_index.mod(2) == 0}bg-sqq-light{#else}bg-white{/if}">
-                        <td class="p-2 font-medium text-sqq-brown">{day}</td>
+                        <td class="p-1 sm:p-2 font-medium text-sqq-brown">{day}</td>
                         {#for slotKey in shoppingSlotKeys}
-                        <td class="p-2 text-center">
+                        <td class="p-1 sm:p-2 text-center">
                             <input type="checkbox"
                                    name="{dayKeys.get(day_index)}_{slotKey}"
                                    value="on"
-                                   class="w-5 h-5 accent-sqq-yellow cursor-pointer">
+                                   class="w-4 h-4 sm:w-5 sm:h-5 accent-sqq-yellow cursor-pointer">
                         </td>
                         {/for}
                     </tr>
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Question 2 -->
-    <div class="bg-white rounded-xl border-2 border-sqq-yellow p-6 shadow-sm">
+    <div class="bg-white rounded-xl border-2 border-sqq-yellow p-4 sm:p-6 shadow-sm">
         <h2 class="text-sqq-brown text-lg font-bold mb-4">
             2. Quels créneaux de permanence préférez-vous ?
         </h2>
@@ -61,8 +61,8 @@
 
         <div class="space-y-4">
             {#for priority in 3}
-            <div class="flex items-center gap-4">
-                <label class="font-medium text-sqq-brown w-24 shrink-0" for="priority_{priority_count}">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <label class="font-medium text-sqq-brown sm:w-24 sm:shrink-0" for="priority_{priority_count}">
                     Choix n°{priority_count}
                 </label>
                 <select name="priority_{priority_count}" id="priority_{priority_count}"
@@ -81,7 +81,7 @@
     <!-- Submit -->
     <div class="text-center">
         <button type="submit"
-                class="bg-sqq-yellow text-sqq-brown font-bold py-3 px-8 rounded-full text-lg hover:brightness-110 transition shadow-md">
+                class="w-full sm:w-auto bg-sqq-yellow text-sqq-brown font-bold py-3 px-8 rounded-full text-lg hover:brightness-110 transition shadow-md">
             Envoyer mes réponses
         </button>
     </div>
