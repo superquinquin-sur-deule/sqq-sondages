@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{#insert title}Sondage SQQ{/insert}</title>
+    {#bundle /}
+</head>
+<body class="bg-sqq-light min-h-screen flex flex-col">
+    <header class="bg-sqq-brown py-4 shadow-md">
+        <div class="max-w-4xl mx-auto px-4 flex items-center gap-4">
+            <img src="/logo.svg" alt="Supermarché coopératif - Quoi? Quoi?" class="h-16 w-auto">
+            <h1 class="text-sqq-yellow text-xl font-bold">{#insert header}Sondage coopérateurs{/insert}</h1>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-4xl mx-auto px-4 py-8 w-full">
+        {#insert body}Contenu{/insert}
+    </main>
+
+    <footer class="bg-sqq-brown text-white text-center py-4 text-sm">
+        <p>Supermarché coopératif Quoi ? Quoi ? &copy; 2025</p>
+    </footer>
+</body>
+</html>

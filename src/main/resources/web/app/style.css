@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@theme {
+    --color-sqq-yellow: #f1dc43;
+    --color-sqq-brown: #453630;
+    --color-sqq-light: #f4f3f3;
+}
