@@ -3,6 +3,7 @@ package coop.sqq.sondages.resource;
 import coop.sqq.sondages.dto.SurveyConstants;
 import coop.sqq.sondages.entity.ServiceShift;
 import coop.sqq.sondages.entity.SurveyResponse;
+import io.quarkus.logging.Log;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.apache.poi.ss.usermodel.*;
@@ -22,6 +23,7 @@ public class ExportResource {
     @GET
     @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     public Response exportXlsx(@CookieParam("sqq_admin") String token) throws IOException {
+        Log.info("Exporting survey responses");
         if (!AdminResource.isAuthenticated(token)) {
             return Response.seeOther(java.net.URI.create("/admin/login")).build();
         }

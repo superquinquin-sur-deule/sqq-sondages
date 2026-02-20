@@ -2,6 +2,7 @@ package coop.sqq.sondages.resource;
 
 import coop.sqq.sondages.dto.StatisticsDto;
 import coop.sqq.sondages.service.StatisticsService;
+import io.quarkus.logging.Log;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
@@ -46,6 +47,7 @@ public class AdminResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response doLogin(@FormParam("password") String password) {
         if (adminPassword.equals(password)) {
+            Log.info("Admin logged in");
             String token = UUID.randomUUID().toString();
             sessions.put(token, true);
             NewCookie cookie = new NewCookie.Builder("sqq_admin")
@@ -55,6 +57,7 @@ public class AdminResource {
                     .build();
             return Response.seeOther(URI.create("/admin")).cookie(cookie).build();
         }
+        Log.warn("Admin login failed");
         return Response.seeOther(URI.create("/admin/login?error=1")).build();
     }
 

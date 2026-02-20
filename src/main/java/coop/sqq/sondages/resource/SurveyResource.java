@@ -2,6 +2,7 @@ package coop.sqq.sondages.resource;
 
 import coop.sqq.sondages.dto.SurveyConstants;
 import coop.sqq.sondages.service.SurveyService;
+import io.quarkus.logging.Log;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
@@ -41,6 +42,7 @@ public class SurveyResource {
     @Path("/submit")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response submitSurvey(MultivaluedMap<String, String> formData) {
+        Log.infof("Received survey: %s", formData);
         surveyService.submitSurvey(formData);
         return Response.seeOther(URI.create("/merci")).build();
     }
