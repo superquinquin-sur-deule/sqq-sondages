@@ -9,6 +9,8 @@ public record StatisticsDto(
         Map<String, Long> shoppingCounts,
         /** Q2: service shifts - map of "DAY_SLOTINDEX" -> weighted score */
         Map<String, Double> serviceScores,
+        /** Q2 bis: service shifts - map of "DAY|SLOT" -> number of available people */
+        Map<String, Long> serviceAvailability,
         List<String> days,
         List<String> shoppingSlots,
         List<String> serviceSlots,
@@ -32,6 +34,12 @@ public record StatisticsDto(
         String key = days.get(dayIdx) + "|" + SurveyConstants.serviceSlotsForDay(dayIdx).get(slotIdx);
         Double score = serviceScores.getOrDefault(key, 0.0);
         return score.intValue();
+    }
+
+    /** Get service availability count by day index and slot index */
+    public long serviceAvailability(int dayIdx, int slotIdx) {
+        String key = days.get(dayIdx) + "|" + SurveyConstants.serviceSlotsForDay(dayIdx).get(slotIdx);
+        return serviceAvailability.getOrDefault(key, 0L);
     }
 
     /** Get service slot label for a given day and slot index (samedi differs) */

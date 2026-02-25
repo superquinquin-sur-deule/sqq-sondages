@@ -93,6 +93,40 @@
         </div>
     </div>
 
+    <!-- Q2 bis: Service shifts availability count -->
+    <div class="bg-white rounded-xl border-2 border-sqq-yellow p-4 sm:p-6 shadow-sm">
+        <h2 class="text-sqq-brown text-lg font-bold mb-4">Créneaux de permanence (nombre de personnes disponibles)</h2>
+        <p class="text-xs text-gray-500 mb-3">+1 par personne ayant choisi ce créneau, quelle que soit la priorité</p>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-sqq-brown text-white">
+                        <th class="p-1 sm:p-2 text-left rounded-tl-lg"></th>
+                        {#for slot in stats.serviceSlots}
+                        <th class="p-1 sm:p-2 text-center {#if slot_isLast}rounded-tr-lg{/if}">{slot}</th>
+                        {/for}
+                    </tr>
+                </thead>
+                <tbody>
+                    {#for day in stats.days}
+                    <tr class="{#if day_index.mod(2) == 0}bg-sqq-light{#else}bg-white{/if}">
+                        <td class="p-1 sm:p-2 font-medium text-sqq-brown">{day}</td>
+                        {#for slot in stats.serviceSlots}
+                        <td class="p-1 sm:p-2 text-center">
+                            <span class="inline-block rounded px-2 py-1 text-xs font-bold
+                                {#if stats.serviceAvailability(day_index, slot_index) > 0}bg-sqq-yellow text-sqq-brown{#else}bg-gray-100 text-gray-400{/if}">
+                                {stats.serviceAvailability(day_index, slot_index)}
+                            </span>
+                        </td>
+                        {/for}
+                    </tr>
+                    {/for}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
 {/body}

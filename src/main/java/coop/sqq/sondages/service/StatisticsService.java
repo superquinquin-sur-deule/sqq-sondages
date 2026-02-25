@@ -53,10 +53,24 @@ public class StatisticsService {
             serviceScores.merge(key, weight, Double::sum);
         }
 
+        // Q2 bis: count of available people per service shift (regardless of priority)
+        Map<String, Long> serviceAvailability = new LinkedHashMap<>();
+        for (int d = 0; d < SurveyConstants.DAYS.size(); d++) {
+            List<String> slots = SurveyConstants.serviceSlotsForDay(d);
+            for (int s = 0; s < slots.size(); s++) {
+                serviceAvailability.put(SurveyConstants.DAYS.get(d) + "|" + slots.get(s), 0L);
+            }
+        }
+        for (ServiceShift shift : shifts) {
+            String key = shift.day + "|" + shift.timeSlot;
+            serviceAvailability.merge(key, 1L, Long::sum);
+        }
+
         return new StatisticsDto(
                 total,
                 shoppingCounts,
                 serviceScores,
+                serviceAvailability,
                 SurveyConstants.DAYS,
                 SurveyConstants.SHOPPING_SLOTS,
                 SurveyConstants.SERVICE_SLOTS,
