@@ -1,7 +1,6 @@
 package coop.sqq.sondages.resource;
 
 import coop.sqq.sondages.dto.SurveyConstants;
-import coop.sqq.sondages.entity.ServiceShift;
 import coop.sqq.sondages.entity.SurveyResponse;
 import io.quarkus.logging.Log;
 import jakarta.ws.rs.*;
@@ -12,8 +11,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Path("/admin/export")
 public class ExportResource {
@@ -34,46 +35,27 @@ public class ExportResource {
             CellStyle headerStyle = createHeaderStyle(workbook);
             Sheet sheet = workbook.createSheet("Réponses");
 
-            // Header row
+            // Ligne d'en-tête : date + une colonne par semaine.
             Row header = sheet.createRow(0);
             int col = 0;
             createCell(header, col++, "Date réponse", headerStyle);
-            for (String day : SurveyConstants.DAYS) {
-                for (String slot : SurveyConstants.SHOPPING_SLOTS) {
-                    createCell(header, col++, day + " - " + slot, headerStyle);
-                }
-            }
-            for (int p = 1; p <= 3; p++) {
-                createCell(header, col++, "Permanence choix " + p, headerStyle);
+            for (SurveyConstants.Week week : SurveyConstants.WEEKS) {
+                createCell(header, col++, week.label(), headerStyle);
             }
 
-            // Data rows
+            // Lignes de données : "X" si la personne est absente cette semaine.
             int rowNum = 1;
             for (SurveyResponse r : responses) {
                 Row row = sheet.createRow(rowNum++);
                 col = 0;
                 row.createCell(col++).setCellValue(r.submittedAt.format(FMT));
 
-                // Q1: shopping slots
-                String slots = r.shoppingSlots != null ? r.shoppingSlots : "";
-                for (int d = 0; d < SurveyConstants.DAYS.size(); d++) {
-                    for (int s = 0; s < SurveyConstants.SHOPPING_SLOTS.size(); s++) {
-                        String key = SurveyConstants.shoppingKey(d, s);
-                        row.createCell(col++).setCellValue(slots.contains(key) ? "X" : "");
-                    }
-                }
-
-                // Q2: service shifts (priority 1, 2, 3)
-                List<ServiceShift> shifts = ServiceShift.list("surveyResponse", r);
-                shifts.sort(Comparator.comparingInt(s -> s.priority));
-                for (int p = 1; p <= 3; p++) {
-                    final int priority = p;
-                    String label = shifts.stream()
-                            .filter(s -> s.priority == priority)
-                            .findFirst()
-                            .map(s -> s.day + " | " + s.timeSlot)
-                            .orElse("");
-                    row.createCell(col++).setCellValue(label);
+                String away = r.awayWeeks != null ? r.awayWeeks : "";
+                Set<String> set = away.isBlank()
+                        ? Set.of()
+                        : new HashSet<>(Arrays.asList(away.split(",")));
+                for (SurveyConstants.Week week : SurveyConstants.WEEKS) {
+                    row.createCell(col++).setCellValue(set.contains(week.key()) ? "X" : "");
                 }
             }
 

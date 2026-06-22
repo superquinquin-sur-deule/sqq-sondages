@@ -1,6 +1,5 @@
 package coop.sqq.sondages.resource;
 
-import coop.sqq.sondages.entity.ServiceShift;
 import coop.sqq.sondages.entity.SurveyResponse;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
@@ -20,32 +19,28 @@ class SurveyResourceTest {
     @BeforeEach
     @Transactional
     void cleanDb() {
-        ServiceShift.deleteAll();
         SurveyResponse.deleteAll();
     }
 
     @Test
-    void showSurvey_returnsFormWithDaysAndSlots() {
+    void showSurvey_returnsFormWithCalendar() {
         given()
             .when().get("/")
             .then()
                 .statusCode(200)
                 .contentType(ContentType.HTML)
-                .body(containsString("Lundi"))
-                .body(containsString("Samedi"))
-                .body(containsString("Matin"))
-                .body(containsString("LUN_MATIN"));
+                .body(containsString("Tu pars en vacances"))
+                .body(containsString("Juillet 2026"))
+                .body(containsString("Août 2026"))
+                .body(containsString("name=\"S28\""));
     }
 
     @Test
     void submitSurvey_redirectsToThankYouPage() {
         given()
             .contentType(ContentType.URLENC)
-            .formParam("LUN_MATIN", "on")
-            .formParam("MAR_MIDI", "on")
-            .formParam("priority_1", "LUN_0")
-            .formParam("priority_2", "MAR_1")
-            .formParam("priority_3", "MER_2")
+            .formParam("S28", "on")
+            .formParam("S29", "on")
             .redirects().follow(false)
         .when()
             .post("/submit")
@@ -59,11 +54,9 @@ class SurveyResourceTest {
     void submitSurvey_persistsResponseInDatabase() {
         given()
             .contentType(ContentType.URLENC)
-            .formParam("LUN_MATIN", "on")
-            .formParam("VEN_SOIR", "on")
-            .formParam("priority_1", "LUN_0")
-            .formParam("priority_2", "SAM_4")
-            .formParam("priority_3", "JEU_3")
+            .formParam("S28", "on")
+            .formParam("S29", "on")
+            .formParam("S31", "on")
             .redirects().follow(false)
         .when()
             .post("/submit");
@@ -72,10 +65,7 @@ class SurveyResourceTest {
         assertEquals(1, responses.size());
 
         SurveyResponse response = responses.getFirst();
-        assertEquals("LUN_MATIN,VEN_SOIR", response.shoppingSlots);
-
-        List<ServiceShift> shifts = ServiceShift.list("surveyResponse", response);
-        assertEquals(3, shifts.size());
+        assertEquals("S28,S29,S31", response.awayWeeks);
     }
 
     @Test
@@ -89,12 +79,17 @@ class SurveyResourceTest {
     }
 
     @Test
-    void submitSurvey_withOnlyShoppingSlots_persistsWithoutShifts() {
+    @Transactional
+    void submitSurvey_withNoWeeks_persistsEmpty() {
         given()
             .contentType(ContentType.URLENC)
-            .formParam("LUN_MATIN", "on")
+            .formParam("ignored", "on")
             .redirects().follow(false)
         .when()
             .post("/submit");
+
+        List<SurveyResponse> responses = SurveyResponse.listAll();
+        assertEquals(1, responses.size());
+        assertEquals("", responses.getFirst().awayWeeks);
     }
 }

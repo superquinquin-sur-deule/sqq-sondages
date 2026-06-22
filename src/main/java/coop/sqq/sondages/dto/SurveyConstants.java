@@ -1,71 +1,84 @@
 package coop.sqq.sondages.dto;
 
-import java.util.LinkedHashMap;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class SurveyConstants {
 
     private SurveyConstants() {}
 
-    public static final List<String> DAYS = List.of(
-            "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi");
+    /** Une case du calendrier (un jour d'une semaine). */
+    public record Day(int dayOfMonth, boolean inMonth) {}
 
-    public static final List<String> SHOPPING_SLOTS = List.of(
-            "Matin", "Midi", "Après-midi", "Soir (après 18h)");
+    /** Une semaine sélectionnable (lundi → dimanche). */
+    public record Week(String key, String label, List<Day> days) {}
 
-    public static final List<String> SERVICE_SLOTS = List.of(
-            "8h45 - 11h30", "11h15 - 14h00", "13h45 - 16h30",
-            "16h15 - 19h00", "18h45 - 21h30");
+    /** Un mois du calendrier avec ses semaines. */
+    public record MonthSection(String monthLabel, List<Week> weeks) {}
 
-    public static final List<String> SERVICE_SLOTS_SAMEDI = List.of(
-            "8h45 - 11h30", "11h15 - 14h00", "13h45 - 16h30",
-            "16h15 - 19h00", "18h45 - 20h45");
+    /** Spécification compacte d'une semaine : clé, label, lundi, mois de classement, libellé du mois. */
+    private record WeekSpec(String key, String label, LocalDate monday, int filingMonth, String monthLabel) {}
 
-    public static final List<String> DAY_KEYS = List.of(
-            "LUN", "MAR", "MER", "JEU", "VEN", "SAM");
+    /**
+     * Semaines de l'été 2026 (juillet + août). Pour changer la période couverte,
+     * éditer UNIQUEMENT cette liste. Les clés (numéros de semaine ISO) ne doivent jamais
+     * être réutilisées pour une autre semaine une fois des données en prod.
+     */
+    private static final List<WeekSpec> SPECS = List.of(
+            new WeekSpec("S27", "29 juin – 5 juil.", LocalDate.of(2026, 6, 29), 7, "Juillet 2026"),
+            new WeekSpec("S28", "6 – 12 juil.",      LocalDate.of(2026, 7, 6),  7, "Juillet 2026"),
+            new WeekSpec("S29", "13 – 19 juil.",     LocalDate.of(2026, 7, 13), 7, "Juillet 2026"),
+            new WeekSpec("S30", "20 – 26 juil.",     LocalDate.of(2026, 7, 20), 7, "Juillet 2026"),
+            new WeekSpec("S31", "27 juil. – 2 août", LocalDate.of(2026, 7, 27), 7, "Juillet 2026"),
+            new WeekSpec("S32", "3 – 9 août",        LocalDate.of(2026, 8, 3),  8, "Août 2026"),
+            new WeekSpec("S33", "10 – 16 août",      LocalDate.of(2026, 8, 10), 8, "Août 2026"),
+            new WeekSpec("S34", "17 – 23 août",      LocalDate.of(2026, 8, 17), 8, "Août 2026"),
+            new WeekSpec("S35", "24 – 30 août",      LocalDate.of(2026, 8, 24), 8, "Août 2026")
+    );
 
-    public static final List<String> SHOPPING_SLOT_KEYS = List.of(
-            "MATIN", "MIDI", "APREM", "SOIR");
+    /** Toutes les semaines, ordre chronologique (parsing, stats, export). */
+    public static final List<Week> WEEKS;
 
-    /** Maps display label to key for days */
-    public static final Map<String, String> DAY_LABEL_TO_KEY;
+    /** Calendrier groupé par mois (formulaire). */
+    public static final List<MonthSection> CALENDAR;
 
     static {
-        DAY_LABEL_TO_KEY = new LinkedHashMap<>();
-        for (int i = 0; i < DAYS.size(); i++) {
-            DAY_LABEL_TO_KEY.put(DAYS.get(i), DAY_KEYS.get(i));
-        }
-    }
-
-    /** Build a form key like "LUN_MATIN" */
-    public static String shoppingKey(int dayIndex, int slotIndex) {
-        return DAY_KEYS.get(dayIndex) + "_" + SHOPPING_SLOT_KEYS.get(slotIndex);
-    }
-
-    /** Get the service slots list for a given day index (samedi has different last slot) */
-    public static List<String> serviceSlotsForDay(int dayIndex) {
-        return dayIndex == 5 ? SERVICE_SLOTS_SAMEDI : SERVICE_SLOTS;
-    }
-
-    /** Build a service shift value like "Lundi | 8h45 - 11h30" */
-    public static String serviceShiftLabel(int dayIndex, int slotIndex) {
-        return DAYS.get(dayIndex) + " | " + serviceSlotsForDay(dayIndex).get(slotIndex);
-    }
-
-    /** Build a service shift value like "LUN_0" */
-    public static String serviceShiftKey(int dayIndex, int slotIndex) {
-        return DAY_KEYS.get(dayIndex) + "_" + slotIndex;
-    }
-
-    /** All 30 service shift options as key -> label pairs */
-    public static Map<String, String> allServiceShiftOptions() {
-        Map<String, String> options = new LinkedHashMap<>();
-        for (int d = 0; d < DAYS.size(); d++) {
-            for (int s = 0; s < SERVICE_SLOTS.size(); s++) {
-                options.put(serviceShiftKey(d, s), serviceShiftLabel(d, s));
+        List<Week> weeks = new ArrayList<>();
+        for (WeekSpec spec : SPECS) {
+            List<Day> days = new ArrayList<>();
+            for (int i = 0; i < 7; i++) {
+                LocalDate date = spec.monday().plusDays(i);
+                days.add(new Day(date.getDayOfMonth(), date.getMonthValue() == spec.filingMonth()));
             }
+            weeks.add(new Week(spec.key(), spec.label(), List.copyOf(days)));
         }
-        return options;
+        WEEKS = List.copyOf(weeks);
+
+        List<MonthSection> sections = new ArrayList<>();
+        String currentLabel = null;
+        List<Week> current = null;
+        for (int idx = 0; idx < SPECS.size(); idx++) {
+            WeekSpec spec = SPECS.get(idx);
+            if (!spec.monthLabel().equals(currentLabel)) {
+                if (current != null) {
+                    sections.add(new MonthSection(currentLabel, List.copyOf(current)));
+                }
+                currentLabel = spec.monthLabel();
+                current = new ArrayList<>();
+            }
+            current.add(WEEKS.get(idx));
+        }
+        if (current != null) {
+            sections.add(new MonthSection(currentLabel, List.copyOf(current)));
+        }
+        CALENDAR = List.copyOf(sections);
+    }
+
+    /** Clés de semaine valides (validation / parsing). */
+    public static Set<String> weekKeys() {
+        return WEEKS.stream().map(Week::key).collect(Collectors.toUnmodifiableSet());
     }
 }

@@ -1,6 +1,5 @@
 package coop.sqq.sondages.resource;
 
-import coop.sqq.sondages.entity.ServiceShift;
 import coop.sqq.sondages.entity.SurveyResponse;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
@@ -18,7 +17,6 @@ class AdminResourceTest {
     @BeforeEach
     @Transactional
     void cleanDb() {
-        ServiceShift.deleteAll();
         SurveyResponse.deleteAll();
     }
 
@@ -89,10 +87,7 @@ class AdminResourceTest {
         // Submit a survey response first
         given()
             .contentType(ContentType.URLENC)
-            .formParam("LUN_MATIN", "on")
-            .formParam("priority_1", "LUN_0")
-            .formParam("priority_2", "MAR_1")
-            .formParam("priority_3", "MER_2")
+            .formParam("S28", "on")
             .redirects().follow(false)
         .when()
             .post("/submit");

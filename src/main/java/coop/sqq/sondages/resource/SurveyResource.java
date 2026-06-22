@@ -31,11 +31,7 @@ public class SurveyResource {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public TemplateInstance showSurvey() {
-        return survey.data("days", SurveyConstants.DAYS)
-                .data("dayKeys", SurveyConstants.DAY_KEYS)
-                .data("shoppingSlots", SurveyConstants.SHOPPING_SLOTS)
-                .data("shoppingSlotKeys", SurveyConstants.SHOPPING_SLOT_KEYS)
-                .data("serviceOptions", SurveyConstants.allServiceShiftOptions());
+        return survey.data("calendar", SurveyConstants.CALENDAR);
     }
 
     @POST

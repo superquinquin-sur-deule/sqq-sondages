@@ -1,6 +1,5 @@
 package coop.sqq.sondages.resource;
 
-import coop.sqq.sondages.entity.ServiceShift;
 import coop.sqq.sondages.entity.SurveyResponse;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
@@ -25,7 +24,6 @@ class ExportResourceTest {
     @BeforeEach
     @Transactional
     void cleanDb() {
-        ServiceShift.deleteAll();
         SurveyResponse.deleteAll();
     }
 
@@ -56,14 +54,10 @@ class ExportResourceTest {
 
     @Test
     void export_withData_containsSubmittedResponse() throws IOException {
-        // Submit a survey response
+        // Submit a survey response (away week S27 = first week column)
         given()
             .contentType(ContentType.URLENC)
-            .formParam("LUN_MATIN", "on")
-            .formParam("MAR_MIDI", "on")
-            .formParam("priority_1", "LUN_0")
-            .formParam("priority_2", "MAR_1")
-            .formParam("priority_3", "MER_2")
+            .formParam("S27", "on")
             .redirects().follow(false)
         .when()
             .post("/submit");
@@ -85,7 +79,7 @@ class ExportResourceTest {
             assertEquals(2, sheet.getPhysicalNumberOfRows());
             // First header cell
             assertEquals("Date réponse", sheet.getRow(0).getCell(0).getStringCellValue());
-            // Shopping slot LUN_MATIN should be "X" (column 1)
+            // Week S27 is the first week column (column 1) and should be "X"
             assertEquals("X", sheet.getRow(1).getCell(1).getStringCellValue());
         }
     }

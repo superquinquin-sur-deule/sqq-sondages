@@ -1,88 +1,63 @@
 {#include base.html}
-{#title}Sondage - Vos habitudes{/title}
-{#header}Sondage Coop' - Vos habitudes{/header}
+{#title}Tu pars en vacances ?{/title}
 {#body}
 
 <div id="already-answered" class="bg-white rounded-xl border-2 border-sqq-yellow p-6 sm:p-8 shadow-sm text-center max-w-lg mx-auto hidden">
-    <div class="text-5xl mb-4">&#9888;</div>
-    <h2 class="text-sqq-brown text-xl font-bold mb-4">Vous avez déjà répondu au sondage</h2>
+    <div class="text-5xl mb-4">&#9989;</div>
+    <h2 class="text-sqq-brown text-xl font-bold mb-4">Tu as déjà répondu</h2>
     <p class="text-gray-600">
-        Nous avons bien enregistré vos réponses. Merci pour votre participation !
+        Nous avons bien enregistré ta réponse. Merci pour ta participation !
     </p>
 </div>
 
 <form action="/submit" method="post" id="survey-form" class="space-y-8">
-    <h1 class="text-2xl sm:text-3xl font-bold text-sqq-brown text-center">
-        Vos habitudes
-        <span class="block mx-auto mt-2 mb-8 w-16 h-1 rounded-full bg-sqq-yellow"></span>
-    </h1>
-    <div class="bg-white rounded-xl border-2 border-sqq-yellow p-4 sm:p-6 shadow-sm">
-        <h2 class="text-sqq-brown text-lg font-bold mb-4">
-            1. En semaine et le samedi, quels sont les jours et moments où vous vous seriez le plus susceptible de faire vos courses alimentaires au magasin ?
-        </h2>
-        <p class="text-sm text-gray-600 mb-4">Cochez tous les créneaux qui vous conviennent.</p>
-        <p id="q1-error" class="hidden text-red-600 text-sm mb-4">Veuillez sélectionner au moins un créneau.</p>
-
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="bg-sqq-brown text-white">
-                        <th class="p-1 sm:p-2 text-left rounded-tl-lg"></th>
-                        {#for slot in shoppingSlots}
-                        <th class="p-1 sm:p-2 text-center {#if slot_isLast}rounded-tr-lg{/if}">{slot}</th>
-                        {/for}
-                    </tr>
-                </thead>
-                <tbody>
-                    {#for day in days}
-                    <tr class="{#if day_index.mod(2) == 0}bg-sqq-light{#else}bg-white{/if}">
-                        <td class="p-1 sm:p-2 font-medium text-sqq-brown">{day}</td>
-                        {#for slotKey in shoppingSlotKeys}
-                        <td class="p-1 sm:p-2 text-center">
-                            <input type="checkbox"
-                                   name="{dayKeys.get(day_index)}_{slotKey}"
-                                   value="on"
-                                   class="w-4 h-4 sm:w-5 sm:h-5 accent-sqq-yellow cursor-pointer">
-                        </td>
-                        {/for}
-                    </tr>
-                    {/for}
-                </tbody>
-            </table>
-        </div>
+    <div class="text-center">
+        <h1 class="text-2xl sm:text-3xl font-bold text-sqq-brown">
+            Tu pars en vacances ?
+            <span class="block mx-auto mt-2 w-16 h-1 rounded-full bg-sqq-yellow"></span>
+        </h1>
+        <p class="text-gray-600 mt-3">Aide nous à quantifier les besoins de produits en magasin</p>
     </div>
 
     <div class="bg-white rounded-xl border-2 border-sqq-yellow p-4 sm:p-6 shadow-sm">
-        <h2 class="text-sqq-brown text-lg font-bold mb-4">
-            2. Quel créneau horaire vous conviendrait le mieux pour faire votre service de 2h45 au magasin ?
+        <h2 class="text-sqq-brown text-lg font-bold mb-2">
+            Quand est-ce que tu ne seras PAS là cet été ?
         </h2>
         <p class="text-sm text-gray-600 mb-4">
-            Choisissez vos 3 créneaux préférés par ordre de priorité (1 = premier choix).
+            Coche la case d'une semaine (ou clique sur la ligne) pour indiquer ton absence.
+            Si tu es là tout l'été, ne coche rien.
         </p>
 
-        <div class="space-y-4">
-            {#for priority in 3}
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <label class="font-medium text-sqq-brown sm:w-24 sm:shrink-0" for="priority_{priority_count}">
-                    Choix n°{priority_count}
-                </label>
-                <select name="priority_{priority_count}" id="priority_{priority_count}"
-                        class="priority-select flex-1 border-2 border-gray-300 rounded-lg p-2 focus:border-sqq-yellow focus:outline-none"
-                        required>
-                    <option value="">-- Sélectionnez un créneau --</option>
-                    {#for entry in serviceOptions.entrySet()}
-                    <option value="{entry.key}">{entry.value}</option>
-                    {/for}
-                </select>
+        {#for month in calendar}
+        <div class="mb-6 last:mb-0">
+            <h3 class="font-bold text-sqq-brown mb-2">{month.monthLabel}</h3>
+            <div class="flex items-center gap-3 px-2 mb-1">
+                <span class="w-5 shrink-0"></span>
+                <div class="grid grid-cols-7 flex-1 text-center text-xs font-medium text-gray-500">
+                    <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                </div>
             </div>
+            {#for week in month.weeks}
+            <label class="flex items-center gap-3 p-2 rounded-lg mb-1.5 cursor-pointer border-2 border-gray-200 transition
+                          hover:border-sqq-yellow hover:bg-sqq-light
+                          has-[:checked]:bg-sqq-yellow has-[:checked]:border-sqq-brown">
+                <input type="checkbox" name="{week.key}" value="on"
+                       class="w-5 h-5 shrink-0 accent-sqq-yellow cursor-pointer">
+                <div class="grid grid-cols-7 flex-1 text-center text-sm">
+                    {#for d in week.days}
+                    <span class="{#if d.inMonth}text-sqq-brown{#else}text-gray-300{/if}">{d.dayOfMonth}</span>
+                    {/for}
+                </div>
+            </label>
             {/for}
         </div>
+        {/for}
     </div>
 
     <div class="text-center">
         <button type="submit"
                 class="w-full sm:w-auto bg-sqq-yellow text-sqq-brown font-bold py-3 px-8 rounded-full text-lg hover:brightness-110 transition shadow-md">
-            Envoyer mes réponses
+            Envoyer ma réponse
         </button>
     </div>
 

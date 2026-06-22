@@ -2,7 +2,6 @@ package coop.sqq.sondages.service;
 
 import coop.sqq.sondages.dto.StatisticsDto;
 import coop.sqq.sondages.dto.SurveyConstants;
-import coop.sqq.sondages.entity.ServiceShift;
 import coop.sqq.sondages.entity.SurveyResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -17,65 +16,22 @@ public class StatisticsService {
         List<SurveyResponse> responses = SurveyResponse.listAll();
         long total = responses.size();
 
-        // Q1: count shopping slots
-        Map<String, Long> shoppingCounts = new LinkedHashMap<>();
-        for (int d = 0; d < SurveyConstants.DAYS.size(); d++) {
-            for (int s = 0; s < SurveyConstants.SHOPPING_SLOTS.size(); s++) {
-                shoppingCounts.put(SurveyConstants.shoppingKey(d, s), 0L);
-            }
+        // Amorce chaque semaine à 0 pour que les semaines sans absence s'affichent quand même.
+        Map<String, Long> awayCounts = new LinkedHashMap<>();
+        for (SurveyConstants.Week w : SurveyConstants.WEEKS) {
+            awayCounts.put(w.key(), 0L);
         }
         for (SurveyResponse r : responses) {
-            if (r.shoppingSlots != null && !r.shoppingSlots.isBlank()) {
-                for (String slot : r.shoppingSlots.split(",")) {
-                    shoppingCounts.merge(slot.trim(), 1L, Long::sum);
+            if (r.awayWeeks != null && !r.awayWeeks.isBlank()) {
+                for (String key : r.awayWeeks.split(",")) {
+                    String k = key.trim();
+                    if (awayCounts.containsKey(k)) { // ignore les clés de semaines supprimées
+                        awayCounts.merge(k, 1L, Long::sum);
+                    }
                 }
             }
         }
 
-        // Q2: weighted scores for service shifts
-        Map<String, Double> serviceScores = new LinkedHashMap<>();
-        for (int d = 0; d < SurveyConstants.DAYS.size(); d++) {
-            List<String> slots = SurveyConstants.serviceSlotsForDay(d);
-            for (int s = 0; s < slots.size(); s++) {
-                serviceScores.put(SurveyConstants.DAYS.get(d) + "|" + slots.get(s), 0.0);
-            }
-        }
-
-        List<ServiceShift> shifts = ServiceShift.listAll();
-        for (ServiceShift shift : shifts) {
-            String key = shift.day + "|" + shift.timeSlot;
-            double weight = switch (shift.priority) {
-                case 1 -> 3.0;
-                case 2 -> 2.0;
-                case 3 -> 1.0;
-                default -> 0.0;
-            };
-            serviceScores.merge(key, weight, Double::sum);
-        }
-
-        // Q2 bis: count of available people per service shift (regardless of priority)
-        Map<String, Long> serviceAvailability = new LinkedHashMap<>();
-        for (int d = 0; d < SurveyConstants.DAYS.size(); d++) {
-            List<String> slots = SurveyConstants.serviceSlotsForDay(d);
-            for (int s = 0; s < slots.size(); s++) {
-                serviceAvailability.put(SurveyConstants.DAYS.get(d) + "|" + slots.get(s), 0L);
-            }
-        }
-        for (ServiceShift shift : shifts) {
-            String key = shift.day + "|" + shift.timeSlot;
-            serviceAvailability.merge(key, 1L, Long::sum);
-        }
-
-        return new StatisticsDto(
-                total,
-                shoppingCounts,
-                serviceScores,
-                serviceAvailability,
-                SurveyConstants.DAYS,
-                SurveyConstants.SHOPPING_SLOTS,
-                SurveyConstants.SERVICE_SLOTS,
-                SurveyConstants.DAY_KEYS,
-                SurveyConstants.SHOPPING_SLOT_KEYS
-        );
+        return new StatisticsDto(total, awayCounts, SurveyConstants.WEEKS);
     }
 }
